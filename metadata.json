@@ -1,0 +1,7 @@
+{
+  "name": "WorkTrack",
+  "description": "An application for employees and contractors to track their work hours and for administrators to manage the data.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
