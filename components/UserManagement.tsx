@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAppContext } from '../App';
 import { User, UserRole } from '../types';
@@ -45,14 +44,16 @@ const UserManagement = ({ allowedRoles }: UserManagementProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
-        // Only update password if a new one is provided
-        const userToUpdate: User = { 
-            ...editingUser, 
-            name: formData.name, 
+        const isPasswordChanging = formData.password && formData.password.length > 0;
+        const userToUpdate: User = {
+            ...editingUser,
+            name: formData.name,
             role: formData.role,
-            password: formData.password ? formData.password : editingUser.password
+            password: isPasswordChanging ? formData.password : editingUser.password,
+            // Force password change on next login if admin resets it
+            forcePasswordChange: isPasswordChanging ? true : editingUser.forcePasswordChange
         };
-      updateUser(userToUpdate);
+        updateUser(userToUpdate);
     } else {
         if (!formData.password) {
             alert('La contraseña es obligatoria para nuevos usuarios.');

@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Chat, GroundingChunk } from "@google/genai";
 
+// FIX: Use process.env.API_KEY to align with coding guidelines and resolve TypeScript error.
 if (!process.env.API_KEY) {
   throw new Error("API_KEY environment variable is not set");
 }

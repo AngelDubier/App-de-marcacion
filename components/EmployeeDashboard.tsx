@@ -4,12 +4,14 @@ import { useAppContext } from '../App';
 import { TimeEntry, LocationInfo } from '../types';
 import { getLocationInfo } from '../services/geminiService';
 import { ClockIcon, LocationMarkerIcon, PlusCircleIcon, LogoutIcon } from './common/Icons';
+import MapView from './MapView';
 
 const EmployeeDashboard = () => {
   const { currentUser, timeEntries, addTimeEntry, updateTimeEntry, logout } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overtimeHours, setOvertimeHours] = useState('');
+  const [mapModalInfo, setMapModalInfo] = useState<LocationInfo | null>(null);
   
   const userTimeEntries = timeEntries.filter(entry => entry.userId === currentUser?.id).sort((a,b) => b.clockIn.getTime() - a.clockIn.getTime());
   const currentEntry = userTimeEntries.find(entry => !entry.clockOut);
@@ -138,19 +140,34 @@ const EmployeeDashboard = () => {
                     </span>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <LocationDetail type="Entrada" time={entry.clockIn} location={entry.clockInLocation} />
-                    {entry.clockOut && entry.clockOutLocation && <LocationDetail type="Salida" time={entry.clockOut} location={entry.clockOutLocation} />}
+                    <LocationDetail type="Entrada" time={entry.clockIn} location={entry.clockInLocation} onViewMap={setMapModalInfo}/>
+                    {entry.clockOut && entry.clockOutLocation && <LocationDetail type="Salida" time={entry.clockOut} location={entry.clockOutLocation} onViewMap={setMapModalInfo}/>}
                 </div>
                  {entry.overtimeHours && <p className="text-right mt-2 font-semibold text-indigo-600 dark:text-indigo-400">Horas Extra: {entry.overtimeHours} hrs</p>}
             </div>
           )) : <p className="text-center text-slate-500 dark:text-slate-400 py-8">Aún no hay registros de tiempo.</p>}
         </div>
       </div>
+
+      {mapModalInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50" onClick={() => setMapModalInfo(null)}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-2xl m-4" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">{mapModalInfo.description}</h3>
+                    <button onClick={() => setMapModalInfo(null)} className="text-2xl leading-none font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">&times;</button>
+                </div>
+                <MapView 
+                    center={[mapModalInfo.latitude, mapModalInfo.longitude]} 
+                    markerText={mapModalInfo.description} 
+                />
+            </div>
+        </div>
+      )}
     </div>
   );
 };
 
-const LocationDetail = ({ type, time, location }: { type: string, time: Date, location: LocationInfo }) => (
+const LocationDetail = ({ type, time, location, onViewMap }: { type: string, time: Date, location: LocationInfo, onViewMap: (loc: LocationInfo) => void }) => (
     <div className="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
         <p className="font-semibold text-slate-800 dark:text-slate-200">{type} a las {time.toLocaleTimeString()}</p>
         <div className="flex items-start gap-2 mt-2 text-slate-600 dark:text-slate-400">
@@ -158,7 +175,10 @@ const LocationDetail = ({ type, time, location }: { type: string, time: Date, lo
             <div>
                 <p>{location.description}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">({location.latitude.toFixed(5)}, {location.longitude.toFixed(5)})</p>
-                {location.mapUri && <a href={location.mapUri} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline text-sm">Ver en el Mapa</a>}
+                <div className="mt-1">
+                    {location.mapUri && <a href={location.mapUri} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline text-sm mr-3">Ver en Google Maps</a>}
+                    <button onClick={() => onViewMap(location)} className="text-indigo-500 hover:underline text-sm">Mostrar mapa</button>
+                </div>
             </div>
         </div>
     </div>
