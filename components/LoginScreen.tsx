@@ -4,15 +4,17 @@ import { useAppContext } from '../App';
 import { UserIcon, KeyIcon, LoginIcon, EyeIcon, EyeSlashIcon } from './common/Icons';
 
 const LoginScreen = () => {
-  const { login } = useAppContext();
+  const { login, isLoading } = useAppContext();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(username, password);
+    setError('');
+    
+    const success = await login(username, password);
     if (!success) {
       setError('Nombre de usuario o contraseña inválidos.');
     }
@@ -22,7 +24,7 @@ const LoginScreen = () => {
     <div className="flex items-center justify-center min-h-screen bg-slate-100 dark:bg-slate-900">
       <div className="w-full max-w-sm p-8 space-y-8 bg-white rounded-xl shadow-lg dark:bg-slate-800">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">TimeTrack</h1>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">PECC-TIME</h1>
           <p className="mt-2 text-slate-500 dark:text-slate-400">Inicia sesión en tu cuenta</p>
         </div>
         <form className="space-y-6" onSubmit={handleLogin}>
@@ -40,6 +42,7 @@ const LoginScreen = () => {
                   className="w-full pl-10 p-3 mt-1 text-gray-800 bg-slate-100 dark:bg-slate-700 dark:text-gray-200 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="ej., Alice"
                   required
+                  disabled={isLoading}
                 />
             </div>
           </div>
@@ -57,6 +60,7 @@ const LoginScreen = () => {
                   className="w-full pl-10 pr-10 p-3 mt-1 text-gray-800 bg-slate-100 dark:bg-slate-700 dark:text-gray-200 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Contraseña"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -70,9 +74,22 @@ const LoginScreen = () => {
           </div>
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           <div>
-            <button type="submit" className="w-full flex justify-center items-center gap-2 py-3 px-4 text-white font-semibold bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-900">
-              <LoginIcon />
-              Iniciar Sesión
+            <button 
+                type="submit" 
+                disabled={isLoading}
+                className={`w-full flex justify-center items-center gap-2 py-3 px-4 text-white font-semibold bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-900 ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
+            >
+              {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Entrando...
+                  </>
+              ) : (
+                  <>
+                    <LoginIcon />
+                    Iniciar Sesión
+                  </>
+              )}
             </button>
           </div>
         </form>

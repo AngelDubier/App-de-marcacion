@@ -3,13 +3,22 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // FIX: Replaced process.cwd() with '.' to resolve TypeScript error 'Property 'cwd' does not exist on type 'Process''. '.' resolves to the project root.
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react()],
-    // FIX: Cleaned up define to only include process.env.API_KEY as it's the only one needed per guidelines.
     define: {
       'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          secure: false,
+          // Si el backend no responde en dev, vite mostrará el error en consola,
+          // y nuestro api.ts hará fallback.
+        }
+      }
+    }
   };
 });

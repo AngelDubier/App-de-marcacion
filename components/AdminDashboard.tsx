@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef, useMemo } from 'react';
 import { useAppContext } from '../App';
 import { getChatbotResponse } from '../services/geminiService';
@@ -30,7 +29,8 @@ const StatCard = ({ icon, title, value }: StatCardProps) => (
 interface DataTableProps {
     title: string;
     headers: string[];
-    children: React.ReactNode;
+    // FIX: Made 'children' prop optional to resolve TypeScript error.
+    children?: React.ReactNode;
 }
 
 const DataTable = ({ title, headers, children }: DataTableProps) => (
@@ -128,7 +128,7 @@ const AdminDashboard = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "datos_timetracker.csv");
+        link.setAttribute("download", "datos_pecc-time.csv");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
